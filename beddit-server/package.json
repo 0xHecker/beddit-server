@@ -26,6 +26,7 @@
     "@mikro-orm/migrations": "^5.2.1",
     "@mikro-orm/postgresql": "^5.2.1",
     "apollo-server-express": "^3.9.0",
+    "argon2": "^0.28.7",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
     "graphql": "^15.3.0",

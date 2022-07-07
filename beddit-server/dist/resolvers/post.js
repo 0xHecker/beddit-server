@@ -23,7 +23,12 @@ let PostResolver = class PostResolver {
         return em.findOne(Post_1.Post, { _id });
     }
     async createPost(title, _id, { em }) {
-        const post = em.fork().create(Post_1.Post, { title, _id });
+        const post = em.fork().create(Post_1.Post, {
+            title,
+            _id,
+            createdAt: new Date,
+            updatedAt: new Date
+        });
         await em.persistAndFlush(post);
         return post;
     }

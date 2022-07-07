@@ -25,7 +25,12 @@ export class PostResolver {
         @Arg('id', () => Int) _id: number,  
         @Ctx() {em}: MyContext
         ): Promise<Post> {
-            const post = em.fork().create(Post, { title, _id }) ;
+            const post = em.fork().create(Post, { 
+                title, 
+                _id ,
+                createdAt: new Date,
+                updatedAt: new Date
+            }) ;
             await em.persistAndFlush(post)
             return post;
     }
