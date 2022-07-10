@@ -1,6 +1,6 @@
-import { Resolver, Mutation, Arg, InputType, Field, Ctx, ObjectType } from "type-graphql";
-import { MyContext } from 'src/types';
-import { User } from "src/entities/User";
+import { Resolver, Mutation, Arg, InputType, Field, Ctx, ObjectType, Query } from "type-graphql";
+import { MyContext } from '../types';
+import { User } from "../entities/User";
 import argon2 from 'argon2'
 
 @InputType()
@@ -31,10 +31,23 @@ class UserResponse {
 @Resolver()
 export class UserResolver {
 
+    @Query(() => User, {nullable: true})
+    me(
+        @Ctx() {req, em}: MyContext
+    ){
+        if(!req.session.userId) {
+            return null;
+        }
+
+        const user = em.findOne(User, { _id: req.session.userId })
+
+        return user;
+    }
+
     @Mutation(() => UserResponse)
     async register(
         @Arg('options') options: UsernamePasswordImport,
-        @Ctx() {em}: MyContext
+        @Ctx() {em, req}: MyContext
     ): Promise<UserResponse> {
 
 
@@ -77,6 +90,11 @@ export class UserResolver {
                 }
             }
         }
+
+        req.headers["x-forwarded-proto"] = "https";
+
+        req.session!.userId = user._id;
+
         return {user};
     }
 
@@ -106,6 +124,8 @@ export class UserResolver {
                 }]
             }
         }
+        // required inorder to store userId cache
+        req.headers["x-forwarded-proto"] = "https";
 
         req.session!.userId = user._id;
 
