@@ -19,6 +19,7 @@ exports.UserResolver = void 0;
 const type_graphql_1 = require("type-graphql");
 const User_1 = require("../entities/User");
 const argon2_1 = __importDefault(require("argon2"));
+const constants_1 = require("../constants");
 let UsernamePasswordImport = class UsernamePasswordImport {
 };
 __decorate([
@@ -67,41 +68,45 @@ let UserResolver = class UserResolver {
         return user;
     }
     async register(options, { em, req }) {
-        if (options.username.length < 2) {
+        if (options.username.length < 3) {
             return {
-                errors: [{
-                        field: 'username',
-                        message: 'username length should bre greater than 2'
-                    }]
+                errors: [
+                    {
+                        field: "username",
+                        message: "username length should bre greater than 2",
+                    },
+                ],
             };
         }
-        if (options.password.length <= 3) {
+        if (options.password.length < 3) {
             return {
-                errors: [{
-                        field: 'password',
-                        message: 'password length should be greater than 3'
-                    }]
+                errors: [
+                    {
+                        field: "password",
+                        message: "password length should be greater than 2",
+                    },
+                ],
             };
         }
         const hashedPassword = await argon2_1.default.hash(options.password);
         const user = em.create(User_1.User, {
             username: options.username,
             password: hashedPassword,
-            createdAt: new Date,
-            updatedAt: new Date
+            createdAt: new Date(),
+            updatedAt: new Date(),
         });
         try {
             await em.persistAndFlush(user);
         }
         catch (err) {
-            if (err.code === '23505' || err.detail.includes('already exists')) {
+            if (err.code === "23505" || err.detail.includes("already exists")) {
                 return {
                     errors: [
                         {
-                            field: 'username',
-                            message: 'username already taken'
-                        }
-                    ]
+                            field: "username",
+                            message: "username already taken",
+                        },
+                    ],
                 };
             }
         }
@@ -115,24 +120,40 @@ let UserResolver = class UserResolver {
         });
         if (!user) {
             return {
-                errors: [{
-                        field: 'username',
-                        message: 'that username does not exist'
-                    }]
+                errors: [
+                    {
+                        field: "username",
+                        message: "that username does not exist",
+                    },
+                ],
             };
         }
         const valid = await argon2_1.default.verify(user.password, options.password);
         if (!valid) {
             return {
-                errors: [{
-                        field: 'password',
-                        message: 'incorrect password'
-                    }]
+                errors: [
+                    {
+                        field: "password",
+                        message: "incorrect password",
+                    },
+                ],
             };
         }
         req.headers["x-forwarded-proto"] = "https";
         req.session.userId = user._id;
         return { user };
+    }
+    logout({ req, res }) {
+        return new Promise((resolve) => {
+            req.session.destroy((err) => {
+                res.clearCookie(constants_1.COOKIE_NAME);
+                if (err) {
+                    console.log(err);
+                    resolve(false);
+                }
+                resolve(true);
+            });
+        });
     }
 };
 __decorate([
@@ -144,7 +165,7 @@ __decorate([
 ], UserResolver.prototype, "me", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => UserResponse),
-    __param(0, (0, type_graphql_1.Arg)('options')),
+    __param(0, (0, type_graphql_1.Arg)("options")),
     __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [UsernamePasswordImport, Object]),
@@ -152,12 +173,19 @@ __decorate([
 ], UserResolver.prototype, "register", null);
 __decorate([
     (0, type_graphql_1.Mutation)(() => UserResponse),
-    __param(0, (0, type_graphql_1.Arg)('options')),
+    __param(0, (0, type_graphql_1.Arg)("options")),
     __param(1, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [UsernamePasswordImport, Object]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "login", null);
+__decorate([
+    (0, type_graphql_1.Mutation)(() => Boolean),
+    __param(0, (0, type_graphql_1.Ctx)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], UserResolver.prototype, "logout", null);
 UserResolver = __decorate([
     (0, type_graphql_1.Resolver)()
 ], UserResolver);

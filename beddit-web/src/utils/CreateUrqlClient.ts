@@ -1,19 +1,17 @@
-import { ChakraProvider } from "@chakra-ui/react";
-import { Provider, createClient, dedupExchange, fetchExchange } from "urql";
-import { cacheExchange } from "@urql/exchange-graphcache";
-
-import theme from "../theme";
-import { AppProps } from "next/app";
+import { dedupExchange, fetchExchange } from "urql";
 import {
 	LoginMutation,
-	LogoutMutation,
-	MeDocument,
 	MeQuery,
+	MeDocument,
 	RegisterMutation,
+	LogoutMutation,
 } from "../generated/graphql";
-import { betterUpdateQuery } from "../utils/betterUpdateQuery";
+import { cacheExchange } from "@urql/exchange-graphcache";
+import { betterUpdateQuery } from "./betterUpdateQuery";
 
-const client = createClient({
+interface Props {}
+
+const CreateUrqlClient = (ssrExchange: any) => ({
 	url: "http://localhost:4000/graphql",
 	fetchOptions: { credentials: "include" },
 	exchanges: [
@@ -70,14 +68,4 @@ const client = createClient({
 	],
 });
 
-function MyApp({ Component, pageProps }: AppProps) {
-	return (
-		<Provider value={client}>
-			<ChakraProvider theme={theme}>
-				<Component {...pageProps} />
-			</ChakraProvider>
-		</Provider>
-	);
-}
-
-export default MyApp;
+export default CreateUrqlClient;
