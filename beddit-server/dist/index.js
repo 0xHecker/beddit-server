@@ -44,27 +44,27 @@ const main = async () => {
     const RedisStore = (0, connect_redis_1.default)(express_session_1.default);
     const redisClient = redis.createClient();
     app.use((0, express_session_1.default)({
-        name: 'qid',
+        name: "qid",
         store: new RedisStore({
             client: redisClient,
-            disableTouch: true
+            disableTouch: true,
         }),
         cookie: {
             maxAge: 1000 * 60 * 60 * 24 * 365,
             httpOnly: true,
-            sameSite: 'none',
-            secure: true
+            sameSite: "none",
+            secure: true,
         },
         saveUninitialized: false,
-        secret: 'fw4y7duiehofjkjgnejuicydsc',
-        resave: false
+        secret: "fw4y7duiehofjkjgnejuicydsc",
+        resave: false,
     }));
     const generator = orm.getSchemaGenerator();
     await generator.updateSchema();
     const apolloServer = new apollo_server_express_1.ApolloServer({
         schema: await (0, type_graphql_1.buildSchema)({
             resolvers: [hello_resolver_1.HelloResolver, post_1.PostResolver, user_1.UserResolver],
-            validate: false
+            validate: false,
         }),
         context: ({ req, res }) => ({ em: orm.em, req, res }),
     });
@@ -72,16 +72,16 @@ const main = async () => {
     apolloServer.applyMiddleware({
         app,
         cors: {
-            origin: ['https://studio.apollographql.com'],
+            origin: ["https://studio.apollographql.com", "http://localhost:3000"],
             credentials: true,
         },
     });
-    app.set('trust proxy', 1);
+    app.set("trust proxy", 1);
     app.get("/", (_, res) => {
         res.send("heloo");
     });
     app.listen(4000, () => {
-        console.log('server started on localhost:4000');
+        console.log("server started on localhost:4000");
     });
 };
 main().catch((err) => {
