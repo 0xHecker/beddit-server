@@ -8,19 +8,23 @@ import { buildSchema } from "type-graphql";
 import { HelloResolver } from "./resolvers/hello-resolver";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
-import * as redis from "redis";
+import redis from "ioredis";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import { MyContext } from "src/types";
+import { sendEmail } from "./utils/sendEmail";
+import { User } from "./entities/User";
 // import {
-//     ApolloServerPluginLandingPageGraphQLPlayground
+// import { User } from './entities/User';
+// ApolloServerPluginLandingPageGraphQLPlayground
 //   } from "apollo-server-core";
 
 const app = express();
 const main = async () => {
+	// sendEmail("bob@bob.com", "hello there");
 	const orm = await MikroORM.init(microConfig);
 	// await orm.getMigrator().up();
-
+	// await orm.em.nativeDelete(User, {});
 	const RedisStore = connectRedis(session);
 	const redisClient = redis.createClient();
 	app.use(
@@ -66,7 +70,11 @@ const main = async () => {
 	apolloServer.applyMiddleware({
 		app,
 		cors: {
-			origin: ["https://studio.apollographql.com", "http://localhost:3000"],
+			origin: [
+				"https://studio.apollographql.com",
+				"http://localhost:3000",
+				"http://localhost:4000",
+			],
 			credentials: true,
 		},
 	});
