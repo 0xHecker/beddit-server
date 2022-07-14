@@ -7,19 +7,19 @@ exports.sendEmail = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
 async function sendEmail(to, html) {
     let testAccount = await nodemailer_1.default.createTestAccount();
-    console.log("testaccount", testAccount);
+    console.log(testAccount);
     let transporter = nodemailer_1.default.createTransport({
         host: "smtp.ethereal.email",
         port: 587,
         secure: false,
         auth: {
-            user: "bslrdqw3hpntefq7@ethereal.email",
-            pass: "e8Wc9mAq893xg8JgdF",
+            user: testAccount.user,
+            pass: testAccount.pass,
         },
     });
     let info = await transporter.sendMail({
-        from: '"bob" <bob2@bob.com>',
-        to: to,
+        from: '"Fred Foo" <foo@example.com>',
+        to,
         subject: "Hello ✔",
         html,
     });

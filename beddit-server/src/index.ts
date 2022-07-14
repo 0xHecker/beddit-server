@@ -1,18 +1,18 @@
 import "reflect-metadata";
-import { MikroORM } from "@mikro-orm/core";
 import { COOKIE_NAME, __prod__ } from "./constants";
-import microConfig from "./mikro-orm.config";
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
 import { HelloResolver } from "./resolvers/hello-resolver";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
-import redis from "ioredis";
+import Redis from "ioredis";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import { MyContext } from "src/types";
 import { sendEmail } from "./utils/sendEmail";
+import { DataSource } from "typeorm";
+import { Post } from "./entities/Post";
 import { User } from "./entities/User";
 // import {
 // import { User } from './entities/User';
@@ -20,18 +20,32 @@ import { User } from "./entities/User";
 //   } from "apollo-server-core";
 
 const app = express();
+
 const main = async () => {
 	// sendEmail("bob@bob.com", "hello there");
-	const orm = await MikroORM.init(microConfig);
+
+	const AppDataSource = new DataSource({
+		type: "postgres",
+		host: "localhost",
+		port: 5432,
+		username: "postgres",
+		password: "postgres",
+		database: "beddit2",
+		synchronize: true,
+		logging: true,
+		entities: [Post, User],
+		migrations: [],
+	});
+
 	// await orm.getMigrator().up();
-	// await orm.em.nativeDelete(User, {});
 	const RedisStore = connectRedis(session);
-	const redisClient = redis.createClient();
+	const redis = Redis.createClient();
+
 	app.use(
 		session({
 			name: COOKIE_NAME,
 			store: new RedisStore({
-				client: redisClient,
+				client: redis,
 				disableTouch: true,
 			}),
 			cookie: {
@@ -58,7 +72,7 @@ const main = async () => {
 			resolvers: [HelloResolver, PostResolver, UserResolver],
 			validate: false,
 		}),
-		context: ({ req, res }): MyContext => ({ em: orm.em, req, res }),
+		context: ({ req, res }): MyContext => ({ req, res, redis }),
 		// plugins: plugins,
 		// plugins: [
 		//     ApolloServerPluginLandingPageGraphQLPlayground(),
