@@ -19,7 +19,7 @@ const Register: React.FC<registerProps> = () => {
 		<>
 			<NavBar />
 
-			<Wrapper varient="small">
+			<Wrapper variant="small">
 				<Formik
 					initialValues={{ username: "", password: "", email: "" }}
 					onSubmit={async (values, { setErrors }) => {

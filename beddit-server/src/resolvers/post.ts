@@ -1,64 +1,83 @@
+import {
+	Resolver,
+	Query,
+	Arg,
+	Mutation,
+	InputType,
+	Field,
+	Ctx,
+	UseMiddleware,
+	Int,
+} from "type-graphql";
+import { Post } from "../entities/Post";
 import { MyContext } from "src/types";
-import { Resolver, Query, Ctx, Arg, Int, Mutation } from "type-graphql"
-import { Post } from '../entities/Post';
+import isAuth from "../middleware/isAuth";
+import { User } from "../entities/User";
 
+@InputType()
+class PostInput {
+	@Field()
+	title: string;
+	@Field()
+	text: string;
+}
 @Resolver()
 export class PostResolver {
+	@Query(() => [Post])
+	async posts(
+		@Arg("limit", () => Int) limit: number,
+		@Arg("cursor", () => String, { nullable: true }) cursor: string | null
+	): Promise<Post[]> {
+		const realLimit = Math.min(50, limit);
+		const posts = Post.getRepository()
+			.createQueryBuilder("user")
+			.orderBy('"createdAt"', "DESC")
+			.take(realLimit);
 
-    @Query(() => [Post])
-    posts(
-        @Ctx() {em}: MyContext): Promise<Post[]> {
-        return em.find(Post, {})
-    }
+		if (cursor) {
+			posts.where('"createdAt" < :cursor', {
+				cursor: new Date(parseInt(cursor)),
+			});
+		}
 
-    @Query(() => Post, {nullable: true})
-    post(
-        @Arg('id', () => Int) _id: number,  
-        @Ctx() {em}: MyContext
-        ): Promise<Post | null> {
-        return em.findOne(Post, { _id });
-    }
+		return posts.getMany();
+	}
 
-    @Mutation(() => Post)
-    async createPost(
-        @Arg('title') title: string,
-        @Arg('id', () => Int) _id: number,  
-        @Ctx() {em}: MyContext
-        ): Promise<Post> {
-            const post = em.fork().create(Post, { 
-                title, 
-                _id ,
-                createdAt: new Date,
-                updatedAt: new Date
-            }) ;
-            await em.persistAndFlush(post)
-            return post;
-    }
+	@Query(() => Post, { nullable: true })
+	post(@Arg("id") _id: number): Promise<Post | null> {
+		return Post.findOne({ where: { _id } });
+	}
 
-    @Mutation(() => Post)
-    async updatePost(
-        @Arg("id") _id: number,
-        @Arg('title', () => String, {nullable: true}) title: string,  
-        @Ctx() {em}: MyContext
-        ): Promise<Post | null> {
-            const post = await em.findOne(Post, {_id});
-            if(!post) {
-                return null;
-            }
-            if(typeof title !== 'undefined'){
-                post.title = title;
-                await em.persistAndFlush(post);
-            }
-            return post;
-    }
+	@Mutation(() => Post)
+	@UseMiddleware(isAuth)
+	async createPost(
+		@Arg("input") input: PostInput,
+		@Ctx() { req }: MyContext
+	): Promise<Post> {
+		return Post.create({
+			...input,
+			creatorId: req.session.userId,
+		}).save();
+	}
 
-    @Mutation(() => Boolean)
-    async deletePost(
-        @Arg("id") _id: number,
-        @Ctx() {em}: MyContext
-        ): Promise<Boolean> {
-            await em.nativeDelete(Post, {_id});
-            return true;
-    }
+	@Mutation(() => Post)
+	async updatePost(
+		@Arg("id") _id: number,
+		@Arg("title", () => String, { nullable: true }) title: string
+	): Promise<Post | null> {
+		const post = await Post.findOne({ where: { _id } });
+		if (!post) {
+			return null;
+		}
+		if (typeof title !== "undefined") {
+			await Post.update({ _id }, { title });
+		}
+		return post;
+	}
 
+	@Mutation(() => Boolean)
+	async deletePost(@Arg("id") _id: number): Promise<Boolean> {
+		await Post.delete({ _id });
+		return true;
+	}
 }

@@ -6,21 +6,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendEmail = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
 async function sendEmail(to, html) {
-    let testAccount = await nodemailer_1.default.createTestAccount();
-    console.log(testAccount);
     let transporter = nodemailer_1.default.createTransport({
         host: "smtp.ethereal.email",
         port: 587,
         secure: false,
         auth: {
-            user: testAccount.user,
-            pass: testAccount.pass,
+            user: "oahxkpqdwkjpfqxn@ethereal.email",
+            pass: "dv4xze8J7tyvYeSEjn",
         },
     });
     let info = await transporter.sendMail({
         from: '"Fred Foo" <foo@example.com>',
         to,
-        subject: "Hello ✔",
+        subject: "Reset your beddit password",
+        text: "Hello world?",
         html,
     });
     console.log("Message sent: %s", info.messageId);

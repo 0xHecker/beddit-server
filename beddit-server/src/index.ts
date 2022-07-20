@@ -10,10 +10,11 @@ import Redis from "ioredis";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import { MyContext } from "src/types";
-import { sendEmail } from "./utils/sendEmail";
 import { DataSource } from "typeorm";
 import { Post } from "./entities/Post";
 import { User } from "./entities/User";
+import { sendEmail } from "./utils/sendEmail";
+import path from "path";
 // import {
 // import { User } from './entities/User';
 // ApolloServerPluginLandingPageGraphQLPlayground
@@ -34,10 +35,13 @@ const main = async () => {
 		synchronize: true,
 		logging: true,
 		entities: [Post, User],
-		migrations: [],
+		migrations: [path.join(__dirname, "./migrations/*")],
 	});
 
-	// await orm.getMigrator().up();
+	await AppDataSource.initialize();
+
+	// await AppDataSource.runMigrations();
+
 	const RedisStore = connectRedis(session);
 	const redis = Redis.createClient();
 
@@ -59,9 +63,6 @@ const main = async () => {
 			resave: false,
 		})
 	);
-
-	const generator = orm.getSchemaGenerator();
-	await generator.updateSchema();
 
 	// const httpServer = http.createServer(app);
 	// const plugins = [ApolloServerPluginDrainHttpServer({ httpServer })];

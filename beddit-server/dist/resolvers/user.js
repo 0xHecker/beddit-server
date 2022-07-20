@@ -51,7 +51,7 @@ UserResponse = __decorate([
     (0, type_graphql_1.ObjectType)()
 ], UserResponse);
 let UserResolver = class UserResolver {
-    async changePassword(token, newPassword, { redis, em, req }) {
+    async changePassword(token, newPassword, confirmNewPassword, { redis, req }) {
         if (newPassword.length < 3) {
             return {
                 errors: [
@@ -62,9 +62,19 @@ let UserResolver = class UserResolver {
                 ],
             };
         }
+        if (newPassword !== confirmNewPassword) {
+            return {
+                errors: [
+                    {
+                        field: "confirmNewPassword",
+                        message: "password fields do not match",
+                    },
+                ],
+            };
+        }
         const key = constants_1.FORGET_PASSWORD_PREFIX + token;
-        const userId = await redis.get(key);
-        if (!userId) {
+        const userIdstr = await redis.get(key);
+        if (!userIdstr) {
             return {
                 errors: [
                     {
@@ -74,7 +84,8 @@ let UserResolver = class UserResolver {
                 ],
             };
         }
-        const user = await em.findOne(User_1.User, { _id: parseInt(userId) });
+        const userId = parseInt(userIdstr);
+        const user = await User_1.User.findOne({ where: { _id: userId } });
         if (!user) {
             return {
                 errors: [
@@ -85,14 +96,13 @@ let UserResolver = class UserResolver {
                 ],
             };
         }
-        user.password = await argon2_1.default.hash(newPassword);
-        em.persistAndFlush(user);
+        User_1.User.update({ _id: userId }, { password: await argon2_1.default.hash(newPassword) });
         await redis.del(key);
         req.session.userId = user._id;
         return { user };
     }
-    async forgotPassword(email, { em, redis }) {
-        const user = await em.findOne(User_1.User, { email });
+    async forgotPassword(email, { redis }) {
+        const user = await User_1.User.findOne({ where: { email } });
         if (!user) {
             return true;
         }
@@ -102,30 +112,38 @@ let UserResolver = class UserResolver {
         await (0, sendEmail_1.sendEmail)(email, `<a href="http://localhost:3000/change-password/${token}"> reset password </a>`);
         return true;
     }
-    me({ req, em }) {
+    me({ req }) {
         if (!req.session.userId) {
             return null;
         }
-        const user = em.findOne(User_1.User, { _id: req.session.userId });
-        return user;
+        return User_1.User.findOne({ where: { _id: req.session.userId } });
     }
-    async register(options, { em, req }) {
+    async register(options, { req }) {
         const errors = (0, validateRegister_1.validateRegister)(options);
         if (errors) {
             return { errors };
         }
         const hashedPassword = await argon2_1.default.hash(options.password);
-        const user = em.create(User_1.User, {
-            username: options.username,
-            password: hashedPassword,
-            email: options.email,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        });
+        let user;
         try {
-            await em.persistAndFlush(user);
+            const result = await User_1.User.create({
+                username: options.username,
+                password: hashedPassword,
+                email: options.email,
+            }).save();
+            user = result;
         }
         catch (err) {
+            if (err.detail.includes("email")) {
+                return {
+                    errors: [
+                        {
+                            field: "email",
+                            message: "that email is already used",
+                        },
+                    ],
+                };
+            }
             if (err.code === "23505" || err.detail.includes("already exists")) {
                 return {
                     errors: [
@@ -141,10 +159,10 @@ let UserResolver = class UserResolver {
         req.session.userId = user._id;
         return { user };
     }
-    async login(usernameOrEmail, password, { em, req }) {
-        const user = await em.findOne(User_1.User, usernameOrEmail.includes("@")
-            ? { email: usernameOrEmail }
-            : { username: usernameOrEmail });
+    async login(usernameOrEmail, password, { req }) {
+        const user = await User_1.User.findOne(usernameOrEmail.includes("@")
+            ? { where: { email: usernameOrEmail } }
+            : { where: { username: usernameOrEmail } });
         if (!user) {
             return {
                 errors: [
@@ -187,9 +205,10 @@ __decorate([
     (0, type_graphql_1.Mutation)(() => UserResponse),
     __param(0, (0, type_graphql_1.Arg)("token")),
     __param(1, (0, type_graphql_1.Arg)("newPassword")),
-    __param(2, (0, type_graphql_1.Ctx)()),
+    __param(2, (0, type_graphql_1.Arg)("confirmNewPassword")),
+    __param(3, (0, type_graphql_1.Ctx)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:paramtypes", [String, String, String, Object]),
     __metadata("design:returntype", Promise)
 ], UserResolver.prototype, "changePassword", null);
 __decorate([

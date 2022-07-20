@@ -17,6 +17,7 @@ const connect_redis_1 = __importDefault(require("connect-redis"));
 const typeorm_1 = require("typeorm");
 const Post_1 = require("./entities/Post");
 const User_1 = require("./entities/User");
+const path_1 = __importDefault(require("path"));
 const app = (0, express_1.default)();
 const main = async () => {
     const AppDataSource = new typeorm_1.DataSource({
@@ -29,8 +30,9 @@ const main = async () => {
         synchronize: true,
         logging: true,
         entities: [Post_1.Post, User_1.User],
-        migrations: [],
+        migrations: [path_1.default.join(__dirname, "./migrations/*")],
     });
+    await AppDataSource.initialize();
     const RedisStore = (0, connect_redis_1.default)(express_session_1.default);
     const redis = ioredis_1.default.createClient();
     app.use((0, express_session_1.default)({
@@ -49,8 +51,6 @@ const main = async () => {
         secret: "fw4y7duiehofjkjgnejuicydsc",
         resave: false,
     }));
-    const generator = orm.getSchemaGenerator();
-    await generator.updateSchema();
     const apolloServer = new apollo_server_express_1.ApolloServer({
         schema: await (0, type_graphql_1.buildSchema)({
             resolvers: [hello_resolver_1.HelloResolver, post_1.PostResolver, user_1.UserResolver],

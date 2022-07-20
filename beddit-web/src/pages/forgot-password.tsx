@@ -5,8 +5,6 @@ import React, { useEffect, useState } from "react";
 import { InputField } from "../components/InputField";
 import NavBar from "../components/NavBar";
 import { Wrapper } from "../components/Wrapper";
-import { toErrorMap } from "../utils/toErrorMap";
-import login from "./login";
 import { withUrqlClient } from "next-urql";
 import CreateUrqlClient from "../utils/CreateUrqlClient";
 import NextLink from "next/link";
@@ -30,7 +28,7 @@ const ForgotPassword: React.FC<{}> = ({}) => {
 		return (
 			<>
 				<NavBar />
-				<Wrapper varient="small">
+				<Wrapper variant="small">
 					<Formik
 						initialValues={{ email: "", password: "" }}
 						onSubmit={async (values) => {

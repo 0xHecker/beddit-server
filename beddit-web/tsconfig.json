@@ -15,6 +15,11 @@
 		"jsx": "preserve",
 		"incremental": true
 	},
-	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+	"include": [
+		"next-env.d.ts",
+		"**/*.ts",
+		"**/*.tsx",
+		"../1658288853286-beddit-server.ts"
+	],
 	"exclude": ["node_modules"]
 }
