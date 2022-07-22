@@ -40,7 +40,7 @@ const main = async () => {
 
 	await AppDataSource.initialize();
 
-	// await AppDataSource.runMigrations();
+	await AppDataSource.runMigrations();
 
 	const RedisStore = connectRedis(session);
 	const redis = Redis.createClient();

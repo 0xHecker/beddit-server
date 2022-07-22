@@ -1,47 +1,86 @@
 import { withUrqlClient } from "next-urql";
 import { useState, useEffect } from "react";
-import NavBar from "../components/NavBar";
 import { usePostsQuery } from "../generated/graphql";
 import CreateUrqlClient from "../utils/CreateUrqlClient";
 import Layout from "../components/Layout";
 import NextLink from "next/link";
-import { Link } from "@chakra-ui/react";
+import { Button, Flex, Heading, Link, Stack } from "@chakra-ui/react";
+import Feature from "../components/Feature";
 
 const Index = () => {
-	const [result] = usePostsQuery({
-		variables: {
-			limit: 3,
-		},
+	const [variables, setVariables] = useState({
+		limit: 10,
+		cursor: null as null | string,
 	});
-	let { data, fetching } = result;
+
+	console.log(variables);
+
+	const [{ data, fetching }] = usePostsQuery({
+		variables,
+	});
 
 	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => {
 		setMounted(true);
-	}, [fetching]);
+	}, [data]);
 
 	if (!mounted) {
 		return <div>Loading...</div>;
 	}
+
+	if (!fetching && !data) {
+		return <div>you got query failed for some reason</div>;
+	}
+
 	if (typeof window === "undefined") {
 		return <>Err...</>;
 	} else {
 		return (
 			<Layout>
-				<NextLink href={"/create-post"}>
-					<Link>Create Post</Link>
-				</NextLink>
-				<div>Home</div>
+				<Flex align={"center"} mb={10}>
+					<Heading>Beddit</Heading>
+					<NextLink href={"/create-post"}>
+						<Link fontWeight={700} color={"red.700"} ml={"auto"}>
+							Create Post
+						</Link>
+					</NextLink>
+				</Flex>
 				<div>
-					{!data ? (
+					{!data && fetching ? (
 						<div> Loading!... </div>
 					) : (
-						data.posts.map((p) => {
-							return <div key={p._id}>{p.title}</div>;
-						})
+						<Stack spacing={8} direction="column">
+							{data ? (
+								data.posts.posts.map((p) => {
+									return (
+										<Feature key={p._id} title={p.title} desc={p.textSnippet} />
+									);
+								})
+							) : (
+								<div>Loading...</div>
+							)}
+						</Stack>
 					)}
 				</div>
+				{data ? (
+					<Flex>
+						<Button
+							onClick={() =>
+								setVariables({
+									limit: variables.limit,
+									cursor:
+										data.posts.posts[data.posts.posts.length - 1].createdAt,
+								})
+							}
+							isLoading={fetching}
+							m="auto"
+							my={8}
+						>
+							load more
+						</Button>
+					</Flex>
+				) : null}
 			</Layout>
 		);
 	}

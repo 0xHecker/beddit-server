@@ -33,6 +33,7 @@ const main = async () => {
         migrations: [path_1.default.join(__dirname, "./migrations/*")],
     });
     await AppDataSource.initialize();
+    await AppDataSource.runMigrations();
     const RedisStore = (0, connect_redis_1.default)(express_session_1.default);
     const redis = ioredis_1.default.createClient();
     app.use((0, express_session_1.default)({
