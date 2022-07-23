@@ -10,6 +10,8 @@ import {
 } from "typeorm";
 import { User } from "./User";
 
+// many to many relationship
+
 @ObjectType()
 @Entity()
 export class Post extends BaseEntity {

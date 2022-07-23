@@ -4,26 +4,28 @@ import { usePostsQuery } from "../generated/graphql";
 import CreateUrqlClient from "../utils/CreateUrqlClient";
 import Layout from "../components/Layout";
 import NextLink from "next/link";
-import { Button, Flex, Heading, Link, Stack } from "@chakra-ui/react";
+import { Button, Flex, Heading, Link, others, Stack } from "@chakra-ui/react";
 import Feature from "../components/Feature";
 
 const Index = () => {
 	const [variables, setVariables] = useState({
-		limit: 10,
+		limit: 33,
 		cursor: null as null | string,
 	});
 
 	console.log(variables);
 
-	const [{ data, fetching }] = usePostsQuery({
+	const [{ data, fetching, ...other }] = usePostsQuery({
 		variables,
 	});
+
+	console.log(data, fetching, other);
 
 	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => {
 		setMounted(true);
-	}, [data]);
+	}, []);
 
 	if (!mounted) {
 		return <div>Loading...</div>;
@@ -63,7 +65,7 @@ const Index = () => {
 						</Stack>
 					)}
 				</div>
-				{data ? (
+				{data?.posts.hasMore ? (
 					<Flex>
 						<Button
 							onClick={() =>

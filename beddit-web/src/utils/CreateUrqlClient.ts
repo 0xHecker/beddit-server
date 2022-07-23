@@ -33,26 +33,22 @@ const errrorExchange: Exchange =
 const cursorPagination = (): Resolver => {
 	return (_parent, fieldArgs, cache, info) => {
 		const { parentKey: entityKey, fieldName } = info;
-		console.log(entityKey, fieldName);
 
 		const allFields = cache.inspectFields(entityKey);
-		console.log("allFields", allFields);
 
 		const fieldInfos = allFields.filter((info) => info.fieldName === fieldName);
 		const size = fieldInfos.length;
 		if (size === 0) {
 			return undefined;
 		}
+		console.log(allFields);
 
 		const fieldKey = `${fieldName}(${stringifyVariables(fieldArgs)})`;
-		console.log("fieldKey: ", fieldKey);
 
-		console.log("fieldArgs: ", fieldArgs);
 		const isItInTheCache = cache.resolve(
 			cache.resolve(entityKey, fieldKey) as string,
 			"posts"
 		);
-		console.log("isItInTheCache: ", isItInTheCache);
 		info.partial = !isItInTheCache;
 
 		let hasMore: boolean = true;
@@ -69,10 +65,12 @@ const cursorPagination = (): Resolver => {
 		});
 
 		let obj = {
+			__typename: "PaginatedPosts",
 			hasMore,
-			poste: results,
+			posts: results,
 		};
-		console.log("thing returned: ", obj);
+
+		// console.log("thing returned: ", obj);
 
 		return obj;
 

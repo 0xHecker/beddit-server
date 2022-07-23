@@ -60,4 +60,4 @@ Post = __decorate([
     (0, typeorm_1.Entity)()
 ], Post);
 exports.Post = Post;
-//# sourceMappingURL=Post.js.map
+//# sourceMappingURL=Updoot.js.map
