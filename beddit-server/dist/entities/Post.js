@@ -46,6 +46,10 @@ __decorate([
     __metadata("design:type", User_1.User)
 ], Post.prototype, "creator", void 0);
 __decorate([
+    (0, typeorm_1.OneToMany)(() => User_1.User, (updoot) => updoot.posts),
+    __metadata("design:type", Array)
+], Post.prototype, "updoots", void 0);
+__decorate([
     (0, type_graphql_1.Field)(() => String),
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)

@@ -10,33 +10,14 @@ import Redis from "ioredis";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import { MyContext } from "src/types";
-import { DataSource } from "typeorm";
-import { Post } from "./entities/Post";
-import { User } from "./entities/User";
-import { sendEmail } from "./utils/sendEmail";
-import path from "path";
-// import {
-// import { User } from './entities/User';
-// ApolloServerPluginLandingPageGraphQLPlayground
-//   } from "apollo-server-core";
+import AppDataSource from "./utils/appDataSource";
+
+// import { sendEmail } from "./utils/sendEmail";
 
 const app = express();
 
 const main = async () => {
 	// sendEmail("bob@bob.com", "hello there");
-
-	const AppDataSource = new DataSource({
-		type: "postgres",
-		host: "localhost",
-		port: 5432,
-		username: "postgres",
-		password: "postgres",
-		database: "beddit2",
-		synchronize: true,
-		logging: true,
-		entities: [Post, User],
-		migrations: [path.join(__dirname, "./migrations/*")],
-	});
 
 	await AppDataSource.initialize();
 

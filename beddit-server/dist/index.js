@@ -14,26 +14,11 @@ const user_1 = require("./resolvers/user");
 const ioredis_1 = __importDefault(require("ioredis"));
 const express_session_1 = __importDefault(require("express-session"));
 const connect_redis_1 = __importDefault(require("connect-redis"));
-const typeorm_1 = require("typeorm");
-const Post_1 = require("./entities/Post");
-const User_1 = require("./entities/User");
-const path_1 = __importDefault(require("path"));
+const appDataSource_1 = __importDefault(require("./utils/appDataSource"));
 const app = (0, express_1.default)();
 const main = async () => {
-    const AppDataSource = new typeorm_1.DataSource({
-        type: "postgres",
-        host: "localhost",
-        port: 5432,
-        username: "postgres",
-        password: "postgres",
-        database: "beddit2",
-        synchronize: true,
-        logging: true,
-        entities: [Post_1.Post, User_1.User],
-        migrations: [path_1.default.join(__dirname, "./migrations/*")],
-    });
-    await AppDataSource.initialize();
-    await AppDataSource.runMigrations();
+    await appDataSource_1.default.initialize();
+    await appDataSource_1.default.runMigrations();
     const RedisStore = (0, connect_redis_1.default)(express_session_1.default);
     const redis = ioredis_1.default.createClient();
     app.use((0, express_session_1.default)({

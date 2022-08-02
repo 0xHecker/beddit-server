@@ -5,15 +5,12 @@ import CreateUrqlClient from "../utils/CreateUrqlClient";
 import Layout from "../components/Layout";
 import NextLink from "next/link";
 import { Button, Flex, Heading, Link, others, Stack } from "@chakra-ui/react";
-import Feature from "../components/Feature";
+import UpdootSection from "../components/UpdootSection";
 
 const Index = () => {
 	const [variables, setVariables] = useState({
-		limit: 33,
-		cursor: null as null | string,
+		limit: 15,
 	});
-
-	console.log(variables);
 
 	const [{ data, fetching, ...other }] = usePostsQuery({
 		variables,
@@ -54,10 +51,8 @@ const Index = () => {
 					) : (
 						<Stack spacing={8} direction="column">
 							{data ? (
-								data.posts.posts.map((p) => {
-									return (
-										<Feature key={p._id} title={p.title} desc={p.textSnippet} />
-									);
+								data!.posts.posts.map((p) => {
+									return <UpdootSection post={p} key={p._id} />;
 								})
 							) : (
 								<div>Loading...</div>

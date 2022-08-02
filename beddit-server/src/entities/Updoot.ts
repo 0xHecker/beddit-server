@@ -1,49 +1,30 @@
-import { Field, ObjectType, Int } from "type-graphql";
-import {
-	BaseEntity,
-	Column,
-	CreateDateColumn,
-	Entity,
-	ManyToOne,
-	PrimaryGeneratedColumn,
-	UpdateDateColumn,
-} from "typeorm";
+import { ObjectType } from "type-graphql";
+import { BaseEntity, Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import { Post } from "./Post";
 import { User } from "./User";
 
 // many to many relationship
+// user <--> post
+// user -> joint table <- post
+//            |
+//            V
+// user -> updoot <- post
 
 @ObjectType()
 @Entity()
-export class Post extends BaseEntity {
-	@Field(() => Int)
-	@PrimaryGeneratedColumn()
-	_id!: number;
+export class Updoot extends BaseEntity {
+	@Column({ type: "int" })
+	value: number;
 
-	@Field(() => Int)
-	@Column()
-	creatorId!: number;
+	@PrimaryColumn()
+	userId: number;
 
-	@Field()
-	@Column()
-	title!: string;
+	@ManyToOne(() => User, (user) => user.updoots)
+	user: User;
 
-	@Field()
-	@Column()
-	text!: string;
+	@PrimaryColumn()
+	postId: number;
 
-	@Field(() => Int)
-	@Column({ type: "int", default: 0 })
-	points!: number;
-
-	@Field()
-	@ManyToOne(() => User, (user) => user.posts)
-	creator: User;
-
-	@Field(() => String)
-	@CreateDateColumn()
-	createdAt: Date;
-
-	@Field(() => String)
-	@UpdateDateColumn()
-	updatedAt: Date;
+	@ManyToOne(() => Post, (post) => post.updoots)
+	post: Post;
 }

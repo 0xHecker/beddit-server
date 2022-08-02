@@ -13,8 +13,10 @@ import {
 	ObjectType,
 } from "type-graphql";
 import { Post } from "../entities/Post";
-import { MyContext } from "src/types";
+import { MyContext } from "../types";
 import isAuth from "../middleware/isAuth";
+import { Updoot } from "../entities/Updoot";
+import AppDataSource from "../utils/appDataSource";
 
 @InputType()
 class PostInput {
@@ -39,6 +41,64 @@ export class PostResolver {
 		return root.text.slice(0, 50);
 	}
 
+	@Mutation(() => Boolean)
+	@UseMiddleware(isAuth)
+	async vote(
+		@Arg("postId", () => Int) postId: number,
+		@Arg("value", () => Int) value: number,
+		@Ctx() { req }: MyContext
+	) {
+		const { userId } = req.session;
+		const updoot = await Updoot.findOne({ where: { postId, userId } });
+		const isUpdoot = value !== -1;
+		const realValue = isUpdoot ? 1 : -1;
+
+		// the user has voted on the post before
+		// and they are changing their vote
+		if (updoot && updoot.value !== realValue) {
+			await AppDataSource.transaction(async (tm) => {
+				await tm.query(
+					`
+					update updoot
+					set value = $1
+					where "postId" = $2 and "userId" = $3
+					`,
+					[realValue, postId, userId]
+				);
+
+				await tm.query(
+					`
+					update post
+					set points = points + $1
+					where _id = $2
+				`,
+					[realValue * 2, postId]
+				);
+			});
+		} else if (!updoot) {
+			// has never voted before
+			AppDataSource.transaction(async (tm) => {
+				await tm.query(
+					`
+					insert into updoot ("userId", "postId", value)
+					values ($1, $2, $3)
+					`,
+					[userId, postId, realValue]
+				);
+
+				await tm.query(
+					`
+					update post
+					set points = points + $1
+					where _id = $2
+				`,
+					[realValue, postId]
+				);
+			});
+		}
+
+		return true;
+	}
 	@Query(() => PaginatedPosts)
 	async posts(
 		@Arg("limit", () => Int) limit: number,
