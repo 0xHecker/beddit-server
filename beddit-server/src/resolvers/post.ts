@@ -102,14 +102,22 @@ export class PostResolver {
 	@Query(() => PaginatedPosts)
 	async posts(
 		@Arg("limit", () => Int) limit: number,
-		@Arg("cursor", () => String, { nullable: true }) cursor: string | null
+		@Arg("cursor", () => String, { nullable: true }) cursor: string | null,
+		@Ctx() { req }: MyContext
 	): Promise<PaginatedPosts> {
 		const realLimit = Math.min(50, limit);
 		const realLimitPlusOne = Math.min(50, limit) + 1;
 
 		const replacements: any[] = [realLimitPlusOne];
+		if (req.session.userId) {
+			replacements.push(req.session.userId);
+		}
+
+		let cursorIdx = 3;
+
 		if (cursor) {
 			replacements.push(new Date(parseInt(cursor)));
+			cursorIdx = replacements.length;
 		}
 
 		const posts = await Post.getRepository().query(
@@ -121,17 +129,20 @@ export class PostResolver {
 				'email', u.email,
 				'createdAt', u."createdAt",
 				'updatedAt', u."updatedAt"
-				) creator
+				) creator,
+				${
+					req.session.userId
+						? '(select value from updoot where "userId" = $2 and "postId" = p._id) "voteStatus"'
+						: 'null as "voteStatus"'
+				}
 			from post p
 			inner join public.user u on u._id = p."creatorId"
-			${cursor ? `where p."createdAt" < $2` : ""}
+			${cursor ? `where p."createdAt" < $${cursorIdx}` : ""}
 			order by p."createdAt" DESC
 			limit $1
 			`,
 			replacements
 		);
-
-		console.log(posts);
 
 		// const qb = Post.getRepository()
 		// 	.createQueryBuilder("p")
@@ -153,9 +164,12 @@ export class PostResolver {
 		};
 	}
 
-	@Query(() => Post, { nullable: true })
-	post(@Arg("id") _id: number): Promise<Post | null> {
-		return Post.findOne({ where: { _id } });
+	@Query(() => Post)
+	async post(@Arg("id", () => Int) _id: number): Promise<Post | null> {
+		let p = await Post.findOne({ where: { _id }, relations: ["creator"] });
+		console.log(p);
+
+		return p;
 	}
 
 	@Mutation(() => Post)
@@ -164,30 +178,53 @@ export class PostResolver {
 		@Arg("input") input: PostInput,
 		@Ctx() { req }: MyContext
 	): Promise<Post> {
-		return Post.create({
+		return await Post.create({
 			...input,
 			creatorId: req.session.userId,
 		}).save();
 	}
 
-	@Mutation(() => Post)
+	@Mutation(() => Post, { nullable: true })
+	@UseMiddleware(isAuth)
 	async updatePost(
-		@Arg("id") _id: number,
-		@Arg("title", () => String, { nullable: true }) title: string
+		@Arg("_id") _id: number,
+		@Arg("title") title: string,
+		@Arg("text") text: string,
+		@Ctx() { req }: MyContext
 	): Promise<Post | null> {
-		const post = await Post.findOne({ where: { _id } });
-		if (!post) {
-			return null;
-		}
-		if (typeof title !== "undefined") {
-			await Post.update({ _id }, { title });
-		}
-		return post;
+		const result = await Post.getRepository()
+			.createQueryBuilder()
+			.update(Post)
+			.set({ title, text })
+			.where('_id = :_id and "creatorId" = :creatorId', {
+				_id,
+				creatorId: req.session.userId,
+			})
+			.returning("*")
+			.execute();
+
+		return result.raw[0];
+		// return await Post.update(
+		// 	{ _id, creatorId: req.session.userId },
+		// 	{ title, text }
+		// );
 	}
 
 	@Mutation(() => Boolean)
-	async deletePost(@Arg("id") _id: number): Promise<Boolean> {
-		await Post.delete({ _id });
+	@UseMiddleware(isAuth)
+	async deletePost(
+		@Arg("id", () => Int) _id: number,
+		@Ctx() { req }: MyContext
+	): Promise<Boolean> {
+		// const post = await Post.findOne({ where: { _id } });
+		// if (!post) {
+		// 	return false;
+		// }
+		// if (post.creatorId !== req.session.userId) {
+		// 	throw new Error("not authorized");
+		// }
+		await Post.delete({ _id, creatorId: req.session.userId });
+
 		return true;
 	}
 }

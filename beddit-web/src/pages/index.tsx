@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { usePostsQuery } from "../generated/graphql";
 import CreateUrqlClient from "../utils/CreateUrqlClient";
 import Layout from "../components/Layout";
-import NextLink from "next/link";
 import { Button, Flex, Heading, Link, others, Stack } from "@chakra-ui/react";
 import UpdootSection from "../components/UpdootSection";
 
@@ -15,8 +14,6 @@ const Index = () => {
 	const [{ data, fetching, ...other }] = usePostsQuery({
 		variables,
 	});
-
-	console.log(data, fetching, other);
 
 	const [mounted, setMounted] = useState(false);
 
@@ -37,23 +34,19 @@ const Index = () => {
 	} else {
 		return (
 			<Layout>
-				<Flex align={"center"} mb={10}>
-					<Heading>Beddit</Heading>
-					<NextLink href={"/create-post"}>
-						<Link fontWeight={700} color={"red.700"} ml={"auto"}>
-							Create Post
-						</Link>
-					</NextLink>
-				</Flex>
 				<div>
 					{!data && fetching ? (
 						<div> Loading!... </div>
 					) : (
 						<Stack spacing={8} direction="column">
 							{data ? (
-								data!.posts.posts.map((p) => {
-									return <UpdootSection post={p} key={p._id} />;
-								})
+								data!.posts.posts.map((p) =>
+									!p ? null : (
+										<Flex key={p._id} p={5} shadow="md" borderWidth={"1px"}>
+											<UpdootSection post={p} key={p._id} />
+										</Flex>
+									)
+								)
 							) : (
 								<div>Loading...</div>
 							)}

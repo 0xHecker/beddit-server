@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Link } from "@chakra-ui/react";
+import { Box, Button, Flex, Text, Link } from "@chakra-ui/react";
 import { FunctionComponent } from "react";
 import NextLink from "next/link";
 import { useLogoutMutation, useMeQuery } from "../generated/graphql";
@@ -7,9 +7,7 @@ interface NavBarProps {}
 
 const NavBar: FunctionComponent<NavBarProps> = ({}) => {
 	const [{ fetching: logoutFetching }, logout] = useLogoutMutation();
-	const [{ data, fetching }] = useMeQuery({
-		pause: isServer(),
-	});
+	const [{ data, fetching }] = useMeQuery();
 
 	let body = null;
 
@@ -19,7 +17,7 @@ const NavBar: FunctionComponent<NavBarProps> = ({}) => {
 		// user not logged in
 	} else if (!data?.me) {
 		body = (
-			<>
+			<Flex align={"center"}>
 				<NextLink href={"/login"}>
 					<Link color={"white"} fontWeight={700} mr={4}>
 						login
@@ -29,12 +27,19 @@ const NavBar: FunctionComponent<NavBarProps> = ({}) => {
 				<NextLink href={"/register"}>
 					<Link mr={4}>register</Link>
 				</NextLink>
-			</>
+			</Flex>
 		);
 		// user is logged in
 	} else {
 		body = (
-			<Flex>
+			<Flex align={"center"}>
+				<Button mr={6}>
+					<NextLink href={"/create-post"}>
+						<Button as={Link} fontWeight={700} color={"red.600"} ml={"auto"}>
+							Create Post
+						</Button>
+					</NextLink>
+				</Button>
 				<Box mr={2}>{data?.me?.username}</Box>
 				<Button
 					onClick={() => logout()}
@@ -48,9 +53,27 @@ const NavBar: FunctionComponent<NavBarProps> = ({}) => {
 			</Flex>
 		);
 	}
+
 	return (
-		<Flex position={"sticky"} top={0} zIndex={1} bg="tomato" p={4}>
-			<Box ml={"auto"}>{body}</Box>
+		<Flex
+			position={"sticky"}
+			top={0}
+			zIndex={1}
+			bg="tomato"
+			p={4}
+			align="center"
+		>
+			<Flex flex={1} m={"auto"} align={"center"} maxW={800}>
+				<NextLink href={"/"}>
+					<Link>
+						<Text fontWeight={600} fontSize={20} color={"white"}>
+							Beddit
+						</Text>
+					</Link>
+				</NextLink>
+
+				<Box ml={"auto"}>{body}</Box>
+			</Flex>
 		</Flex>
 	);
 };

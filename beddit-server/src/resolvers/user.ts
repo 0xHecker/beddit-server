@@ -98,7 +98,10 @@ export class UserResolver {
 			};
 		}
 
-		User.update({ _id: userId }, { password: await argon2.hash(newPassword) });
+		await User.update(
+			{ _id: userId },
+			{ password: await argon2.hash(newPassword) }
+		);
 
 		await redis.del(key);
 		// login after change password
@@ -131,11 +134,11 @@ export class UserResolver {
 	}
 
 	@Query(() => User, { nullable: true })
-	me(@Ctx() { req }: MyContext) {
+	async me(@Ctx() { req }: MyContext) {
 		if (!req.session.userId) {
 			return null;
 		}
-		return User.findOne({ where: { _id: req.session.userId } });
+		return await User.findOne({ where: { _id: req.session.userId } });
 	}
 
 	@Mutation(() => UserResponse)

@@ -1,8 +1,14 @@
-import { Box, Flex, Heading, IconButton, Text } from "@chakra-ui/react";
-import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+import { Box, Flex, Heading, IconButton, Link, Text } from "@chakra-ui/react";
+import { ChevronDownIcon, ChevronUpIcon, DeleteIcon } from "@chakra-ui/icons";
 import React, { useState } from "react";
-import { PostSnippetFragment, useVoteMutation } from "../generated/graphql";
-
+import {
+	PostSnippetFragment,
+	useDeletePostMutation,
+	useMeQuery,
+	useVoteMutation,
+} from "../generated/graphql";
+import NextLink from "next/link";
+import router from "next/router";
 type UpdootSectionProps = {
 	post: PostSnippetFragment;
 };
@@ -12,6 +18,11 @@ const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
 		"updoot-loading" | "downdoot-loading" | "not-loading"
 	>("not-loading");
 	const [, vote] = useVoteMutation();
+
+	const [{ data: userData, fetching: userFetching }] = useMeQuery();
+
+	const [, deletePost] = useDeletePostMutation();
+
 	return (
 		<Flex p={5} shadow="md" width="100%" borderWidth="1px">
 			<Flex
@@ -22,6 +33,10 @@ const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
 			>
 				<IconButton
 					onClick={async () => {
+						if (post.voteStatus === 1) {
+							return;
+						}
+
 						setLoadingState("updoot-loading");
 						await vote({
 							postId: post._id,
@@ -30,6 +45,7 @@ const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
 						setLoadingState("not-loading");
 					}}
 					key={post._id}
+					colorScheme={post.voteStatus === 1 ? "green" : undefined}
 					isLoading={loadingState === "updoot-loading"}
 					aria-label="updoot post"
 					icon={<ChevronUpIcon w="24px" h="24px" />}
@@ -39,24 +55,52 @@ const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
 
 				<IconButton
 					onClick={async () => {
+						if (post.voteStatus === -1) return;
 						setLoadingState("downdoot-loading");
 
-						vote({
+						await vote({
 							postId: post._id,
 							value: -1,
 						});
 						setLoadingState("not-loading");
 					}}
+					colorScheme={post.voteStatus === -1 ? "red" : undefined}
 					isLoading={loadingState === "downdoot-loading"}
 					aria-label="downdoot post"
 					icon={<ChevronDownIcon w="24px" h="24px" />}
 				/>
 			</Flex>
-
-			<Box mt={2} key={post._id}>
-				<Heading fontSize="xl">{post.title}</Heading>
+			<Box flex={1}>
+				<NextLink href="/post/[id]" as={`/post/${post._id}`}>
+					<Link>
+						<Heading fontSize="xl">{post.title}</Heading>
+					</Link>
+				</NextLink>
 				posted by <b>{post.creator.username}</b>{" "}
-				<Text mt={4}>{post.textSnippet}</Text>
+				<Flex align={"center"}>
+					<Text flex={1} mt={4}>
+						{post.textSnippet}
+					</Text>
+					<Box>
+						{userData ? (
+							userData?.me?._id === post.creatorId ? (
+								<IconButton
+									onClick={async () => {
+										deletePost({ deletePostId: post._id });
+									}}
+									ml={"auto"}
+									colorScheme={"red"}
+									aria-label="delete post"
+									icon={<DeleteIcon w="20px" h="20px" />}
+								/>
+							) : (
+								""
+							)
+						) : (
+							""
+						)}
+					</Box>
+				</Flex>
 			</Box>
 		</Flex>
 	);

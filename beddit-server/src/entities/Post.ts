@@ -4,6 +4,7 @@ import {
 	Column,
 	CreateDateColumn,
 	Entity,
+	JoinColumn,
 	ManyToOne,
 	OneToMany,
 	PrimaryGeneratedColumn,
@@ -23,6 +24,9 @@ export class Post extends BaseEntity {
 	@Column()
 	creatorId!: number;
 
+	@Field(() => Int, { nullable: true })
+	voteStatus: number | null; // 1 or -1 or null
+
 	@Field()
 	@Column()
 	title!: string;
@@ -36,8 +40,8 @@ export class Post extends BaseEntity {
 	points!: number;
 
 	@Field()
-	@ManyToOne(() => User, (user) => user.posts)
-	creator: User;
+	@ManyToOne(() => User, (user) => user.posts, { nullable: true })
+	creator!: User;
 
 	@OneToMany(() => User, (updoot) => updoot.posts)
 	updoots: Updoot[];
