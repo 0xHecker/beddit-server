@@ -199,6 +199,15 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null, user?: { __typename?: 'User', _id: number, username: string, updatedAt: string, email: string } | null } };
 
+export type UpdatePostMutationVariables = Exact<{
+  text: Scalars['String'];
+  title: Scalars['String'];
+  id: Scalars['Float'];
+}>;
+
+
+export type UpdatePostMutation = { __typename?: 'Mutation', updatePost?: { __typename?: 'Post', _id: number, creatorId: number, voteStatus?: number | null, title: string, text: string, points: number, createdAt: string, updatedAt: string, textSnippet: string } | null };
+
 export type VoteMutationVariables = Exact<{
   value: Scalars['Int'];
   postId: Scalars['Int'];
@@ -358,6 +367,25 @@ export const RegisterDocument = gql`
 
 export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
+};
+export const UpdatePostDocument = gql`
+    mutation UpdatePost($text: String!, $title: String!, $id: Float!) {
+  updatePost(text: $text, title: $title, _id: $id) {
+    _id
+    creatorId
+    voteStatus
+    title
+    text
+    points
+    createdAt
+    updatedAt
+    textSnippet
+  }
+}
+    `;
+
+export function useUpdatePostMutation() {
+  return Urql.useMutation<UpdatePostMutation, UpdatePostMutationVariables>(UpdatePostDocument);
 };
 export const VoteDocument = gql`
     mutation Vote($value: Int!, $postId: Int!) {

@@ -191,7 +191,7 @@ __decorate([
 __decorate([
     (0, type_graphql_1.Mutation)(() => Post_1.Post, { nullable: true }),
     (0, type_graphql_1.UseMiddleware)(isAuth_1.default),
-    __param(0, (0, type_graphql_1.Arg)("_id")),
+    __param(0, (0, type_graphql_1.Arg)("_id", () => type_graphql_1.Int)),
     __param(1, (0, type_graphql_1.Arg)("title")),
     __param(2, (0, type_graphql_1.Arg)("text")),
     __param(3, (0, type_graphql_1.Ctx)()),

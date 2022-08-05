@@ -1,10 +1,16 @@
 import { Box, Flex, Heading, IconButton, Link, Text } from "@chakra-ui/react";
-import { ChevronDownIcon, ChevronUpIcon, DeleteIcon } from "@chakra-ui/icons";
+import {
+	ChevronDownIcon,
+	ChevronUpIcon,
+	DeleteIcon,
+	EditIcon,
+} from "@chakra-ui/icons";
 import React, { useState } from "react";
 import {
 	PostSnippetFragment,
 	useDeletePostMutation,
 	useMeQuery,
+	useUpdatePostMutation,
 	useVoteMutation,
 } from "../generated/graphql";
 import NextLink from "next/link";
@@ -22,6 +28,7 @@ const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
 	const [{ data: userData, fetching: userFetching }] = useMeQuery();
 
 	const [, deletePost] = useDeletePostMutation();
+	const [, updatePost] = useUpdatePostMutation();
 
 	return (
 		<Flex p={5} shadow="md" width="100%" borderWidth="1px">
@@ -84,12 +91,33 @@ const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
 					<Box>
 						{userData ? (
 							userData?.me?._id === post.creatorId ? (
+								<NextLink
+									href={"/post/edit/[id]"}
+									as={`/post/edit/${post._id}`}
+								>
+									<IconButton
+										ml={"auto"}
+										mr={4}
+										colorScheme={"gray"}
+										aria-label="update post"
+										icon={<EditIcon w="20px" h="20px" />}
+									/>
+								</NextLink>
+							) : (
+								""
+							)
+						) : (
+							""
+						)}
+
+						{userData ? (
+							userData?.me?._id === post.creatorId ? (
 								<IconButton
 									onClick={async () => {
 										deletePost({ deletePostId: post._id });
 									}}
 									ml={"auto"}
-									colorScheme={"red"}
+									colorScheme={"gray"}
 									aria-label="delete post"
 									icon={<DeleteIcon w="20px" h="20px" />}
 								/>

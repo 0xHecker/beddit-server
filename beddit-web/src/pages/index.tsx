@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { usePostsQuery } from "../generated/graphql";
 import CreateUrqlClient from "../utils/CreateUrqlClient";
 import Layout from "../components/Layout";
-import { Button, Flex, Heading, Link, others, Stack } from "@chakra-ui/react";
+import { Button, Flex, Stack } from "@chakra-ui/react";
 import UpdootSection from "../components/UpdootSection";
 
 const Index = () => {
