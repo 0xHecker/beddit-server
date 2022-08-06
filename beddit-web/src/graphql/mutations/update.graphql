@@ -1,4 +1,4 @@
-mutation UpdatePost($text: String!, $title: String!, $id: Float!) {
+mutation UpdatePost($text: String!, $title: String!, $id: Int!) {
 	updatePost(text: $text, title: $title, _id: $id) {
 		_id
 		creatorId

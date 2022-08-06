@@ -91,36 +91,30 @@ const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
 					<Box>
 						{userData ? (
 							userData?.me?._id === post.creatorId ? (
-								<NextLink
-									href={"/post/edit/[id]"}
-									as={`/post/edit/${post._id}`}
-								>
-									<IconButton
-										ml={"auto"}
-										mr={4}
-										colorScheme={"gray"}
-										aria-label="update post"
-										icon={<EditIcon w="20px" h="20px" />}
-									/>
-								</NextLink>
-							) : (
-								""
-							)
-						) : (
-							""
-						)}
+								<div>
+									<NextLink
+										href={"/post/edit/[id]"}
+										as={`/post/edit/${post._id}`}
+									>
+										<IconButton
+											ml={"auto"}
+											mr={4}
+											colorScheme={"gray"}
+											aria-label="update post"
+											icon={<EditIcon w="20px" h="20px" />}
+										/>
+									</NextLink>
 
-						{userData ? (
-							userData?.me?._id === post.creatorId ? (
-								<IconButton
-									onClick={async () => {
-										deletePost({ deletePostId: post._id });
-									}}
-									ml={"auto"}
-									colorScheme={"gray"}
-									aria-label="delete post"
-									icon={<DeleteIcon w="20px" h="20px" />}
-								/>
+									<IconButton
+										onClick={async () => {
+											deletePost({ deletePostId: post._id });
+										}}
+										ml={"auto"}
+										colorScheme={"gray"}
+										aria-label="delete post"
+										icon={<DeleteIcon w="20px" h="20px" />}
+									/>
+								</div>
 							) : (
 								""
 							)

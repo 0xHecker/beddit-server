@@ -2,27 +2,14 @@ import { withUrqlClient } from "next-urql";
 import React, { useEffect, useState } from "react";
 import CreateUrqlClient from "../../utils/CreateUrqlClient";
 import { useRouter } from "next/router";
-import {
-	useDeletePostMutation,
-	useMeQuery,
-	usePostQuery,
-} from "../../generated/graphql";
 import Layout from "../../components/Layout";
-import { Box, Flex, Heading, IconButton } from "@chakra-ui/react";
-import { DeleteIcon } from "@chakra-ui/icons";
+import { useGetPostFromURl } from "../../utils/useGetPostFromUrl";
+import { Flex, Heading } from "@chakra-ui/react";
 
 const Post = ({}) => {
 	const router = useRouter();
-	let intId =
-		typeof router.query.id === "string" ? parseInt(router.query.id) : -1;
-	const [{ data, error, fetching }] = usePostQuery({
-		variables: {
-			postId: intId,
-		},
-	});
-	// const [{ data: userData, fetching: userFetching }] = useMeQuery();
 
-	// const [, deletePost] = useDeletePostMutation();
+	const [{ data, error, fetching }] = useGetPostFromURl();
 
 	const [mounted, setMounted] = useState(false);
 	useEffect(() => {
@@ -41,9 +28,12 @@ const Post = ({}) => {
 	}
 
 	if (!data?.post) {
-		return <div>Could not find the post </div>;
+		return (
+			<Layout>
+				<div>Couldn't find the post</div>
+			</Layout>
+		);
 	}
-
 	if (!mounted) {
 		return <div>Loading...</div>;
 	}

@@ -69,7 +69,7 @@ export type MutationRegisterArgs = {
 
 
 export type MutationUpdatePostArgs = {
-  _id: Scalars['Float'];
+  _id: Scalars['Int'];
   text: Scalars['String'];
   title: Scalars['String'];
 };
@@ -202,7 +202,7 @@ export type RegisterMutation = { __typename?: 'Mutation', register: { __typename
 export type UpdatePostMutationVariables = Exact<{
   text: Scalars['String'];
   title: Scalars['String'];
-  id: Scalars['Float'];
+  id: Scalars['Int'];
 }>;
 
 
@@ -369,7 +369,7 @@ export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
 };
 export const UpdatePostDocument = gql`
-    mutation UpdatePost($text: String!, $title: String!, $id: Float!) {
+    mutation UpdatePost($text: String!, $title: String!, $id: Int!) {
   updatePost(text: $text, title: $title, _id: $id) {
     _id
     creatorId
