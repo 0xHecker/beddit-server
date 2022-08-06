@@ -1,20 +1,13 @@
+import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import { Box, Flex, Heading, IconButton, Link, Text } from "@chakra-ui/react";
-import {
-	ChevronDownIcon,
-	ChevronUpIcon,
-	DeleteIcon,
-	EditIcon,
-} from "@chakra-ui/icons";
+import NextLink from "next/link";
 import React, { useState } from "react";
 import {
 	PostSnippetFragment,
-	useDeletePostMutation,
 	useMeQuery,
-	useUpdatePostMutation,
 	useVoteMutation,
 } from "../generated/graphql";
-import NextLink from "next/link";
-import router from "next/router";
+import { EditDeletePostButton } from "./EditDeletePostButtons";
 type UpdootSectionProps = {
 	post: PostSnippetFragment;
 };
@@ -26,9 +19,6 @@ const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
 	const [, vote] = useVoteMutation();
 
 	const [{ data: userData, fetching: userFetching }] = useMeQuery();
-
-	const [, deletePost] = useDeletePostMutation();
-	const [, updatePost] = useUpdatePostMutation();
 
 	return (
 		<Flex p={5} shadow="md" width="100%" borderWidth="1px">
@@ -83,45 +73,20 @@ const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
 						<Heading fontSize="xl">{post.title}</Heading>
 					</Link>
 				</NextLink>
-				posted by <b>{post.creator.username}</b>{" "}
+				posted by <b>{post.creator.username}</b>
 				<Flex align={"center"}>
 					<Text flex={1} mt={4}>
 						{post.textSnippet}
 					</Text>
-					<Box>
-						{userData ? (
-							userData?.me?._id === post.creatorId ? (
-								<div>
-									<NextLink
-										href={"/post/edit/[id]"}
-										as={`/post/edit/${post._id}`}
-									>
-										<IconButton
-											ml={"auto"}
-											mr={4}
-											colorScheme={"gray"}
-											aria-label="update post"
-											icon={<EditIcon w="20px" h="20px" />}
-										/>
-									</NextLink>
-
-									<IconButton
-										onClick={async () => {
-											deletePost({ deletePostId: post._id });
-										}}
-										ml={"auto"}
-										colorScheme={"gray"}
-										aria-label="delete post"
-										icon={<DeleteIcon w="20px" h="20px" />}
-									/>
-								</div>
-							) : (
-								""
-							)
+					{userData ? (
+						userData?.me?._id === post.creatorId ? (
+							<EditDeletePostButton id={post._id} />
 						) : (
 							""
-						)}
-					</Box>
+						)
+					) : (
+						""
+					)}
 				</Flex>
 			</Box>
 		</Flex>

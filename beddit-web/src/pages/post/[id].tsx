@@ -1,15 +1,16 @@
 import { withUrqlClient } from "next-urql";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import CreateUrqlClient from "../../utils/CreateUrqlClient";
-import { useRouter } from "next/router";
+
+import { Box, Flex, Heading } from "@chakra-ui/react";
+import { EditDeletePostButton } from "../../components/EditDeletePostButtons";
 import Layout from "../../components/Layout";
+import { useMeQuery } from "../../generated/graphql";
 import { useGetPostFromURl } from "../../utils/useGetPostFromUrl";
-import { Flex, Heading } from "@chakra-ui/react";
 
 const Post = ({}) => {
-	const router = useRouter();
-
 	const [{ data, error, fetching }] = useGetPostFromURl();
+	const [{ data: userData, fetching: userFetching }] = useMeQuery();
 
 	const [mounted, setMounted] = useState(false);
 	useEffect(() => {
@@ -28,12 +29,9 @@ const Post = ({}) => {
 	}
 
 	if (!data?.post) {
-		return (
-			<Layout>
-				<div>Couldn't find the post</div>
-			</Layout>
-		);
+		return <div>Could not find the post </div>;
 	}
+
 	if (!mounted) {
 		return <div>Loading...</div>;
 	}
@@ -49,27 +47,17 @@ const Post = ({}) => {
 			<Layout>
 				<Flex width={700} justify={"space-between"}>
 					<Heading mb={4}>{data.post.title}</Heading>
-					{/* <Box>
+					<Box>
 						{userData ? (
 							userData?.me?._id === data.post.creatorId ? (
-								<IconButton
-									onClick={async () => {
-										await deletePost({ deletePostId: data?.post._id });
-										console.log(router.route);
-
-										router.push("/");
-									}}
-									colorScheme={"red"}
-									aria-label="delete post"
-									icon={<DeleteIcon w="20px" h="20px" />}
-								/>
+								<EditDeletePostButton id={data.post._id} />
 							) : (
 								""
 							)
 						) : (
 							""
 						)}
-					</Box> */}
+					</Box>
 				</Flex>
 
 				{data?.post.text}

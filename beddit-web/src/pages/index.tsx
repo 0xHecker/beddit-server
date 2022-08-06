@@ -41,11 +41,7 @@ const Index = () => {
 						<Stack spacing={8} direction="column">
 							{data ? (
 								data!.posts.posts.map((p) =>
-									!p ? null : (
-										<Flex key={p._id} p={5} shadow="md" borderWidth={"1px"}>
-											<UpdootSection post={p} key={p._id} />
-										</Flex>
-									)
+									!p ? null : <UpdootSection post={p} key={p._id} />
 								)
 							) : (
 								<div>Loading...</div>
