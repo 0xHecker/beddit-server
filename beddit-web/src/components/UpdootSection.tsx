@@ -78,15 +78,8 @@ const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
 					<Text flex={1} mt={4}>
 						{post.textSnippet}
 					</Text>
-					{userData ? (
-						userData?.me?._id === post.creatorId ? (
-							<EditDeletePostButton id={post._id} />
-						) : (
-							""
-						)
-					) : (
-						""
-					)}
+
+					<EditDeletePostButton id={post._id} creatorId={post.creatorId} />
 				</Flex>
 			</Box>
 		</Flex>

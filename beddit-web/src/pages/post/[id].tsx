@@ -48,15 +48,10 @@ const Post = ({}) => {
 				<Flex width={700} justify={"space-between"}>
 					<Heading mb={4}>{data.post.title}</Heading>
 					<Box>
-						{userData ? (
-							userData?.me?._id === data.post.creatorId ? (
-								<EditDeletePostButton id={data.post._id} />
-							) : (
-								""
-							)
-						) : (
-							""
-						)}
+						<EditDeletePostButton
+							id={data.post._id}
+							creatorId={data.post.creatorId}
+						/>
 					</Box>
 				</Flex>
 

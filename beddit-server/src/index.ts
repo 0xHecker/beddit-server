@@ -13,6 +13,7 @@ import { MyContext } from "src/types";
 import AppDataSource from "./utils/appDataSource";
 
 // import { sendEmail } from "./utils/sendEmail";
+import { createUserLoader } from "./utils/createUserLoader";
 
 const app = express();
 
@@ -54,7 +55,12 @@ const main = async () => {
 			resolvers: [HelloResolver, PostResolver, UserResolver],
 			validate: false,
 		}),
-		context: ({ req, res }): MyContext => ({ req, res, redis }),
+		context: ({ req, res }): MyContext => ({
+			req,
+			res,
+			redis,
+			userLoader: createUserLoader(),
+		}),
 		// plugins: plugins,
 		// plugins: [
 		//     ApolloServerPluginLandingPageGraphQLPlayground(),

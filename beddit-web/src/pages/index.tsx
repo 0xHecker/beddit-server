@@ -11,7 +11,7 @@ const Index = () => {
 		limit: 15,
 	});
 
-	const [{ data, fetching, ...other }] = usePostsQuery({
+	const [{ data, fetching, error, ...other }] = usePostsQuery({
 		variables,
 	});
 
@@ -26,7 +26,12 @@ const Index = () => {
 	}
 
 	if (!fetching && !data) {
-		return <div>you got query failed for some reason</div>;
+		return (
+			<div>
+				<div>{error?.message}</div>
+				<div>you got query failed for some reason</div>
+			</div>
+		);
 	}
 
 	if (typeof window === "undefined") {
