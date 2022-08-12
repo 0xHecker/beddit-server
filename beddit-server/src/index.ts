@@ -27,6 +27,7 @@ const main = async () => {
 
 	const RedisStore = connectRedis(session);
 	const redis = Redis.createClient();
+	app.set("trust proxy", 1);
 
 	app.use(
 		session({
@@ -40,6 +41,7 @@ const main = async () => {
 				httpOnly: true,
 				sameSite: "none", //'lax', // csrf
 				secure: true, //__prod__ // cookie only works in https
+				// domain: "",
 			},
 			saveUninitialized: false,
 			secret: process.env.SESSION_SECRET,
@@ -73,11 +75,7 @@ const main = async () => {
 	apolloServer.applyMiddleware({
 		app,
 		cors: {
-			origin: [
-				"https://studio.apollographql.com",
-				"http://localhost:3000",
-				"http://localhost:4000",
-			],
+			origin: ["https://studio.apollographql.com", process.env.CORS_ORIGIN],
 			credentials: true,
 		},
 	});
@@ -90,15 +88,6 @@ const main = async () => {
 	app.listen(PORT, () => {
 		console.log(`server started on localhost:${PORT}`);
 	});
-
-	// await new Promise<void>(resolve =>
-	//     httpServer.listen({ port: 4000}, resolve)
-	// );
-
-	// const post = orm.em.fork({}).create(Post, {title: "my third post"});
-	// await orm.em.persistAndFlush(post);
-	// const posts = await orm.em.fork({}).find(Post, {})
-	// console.log(posts)
 };
 
 main().catch((err) => {
