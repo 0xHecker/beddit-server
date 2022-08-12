@@ -1,17 +1,16 @@
-import { Field, ObjectType, Int } from "type-graphql";
+import { Field, Int, ObjectType } from "type-graphql";
 import {
 	BaseEntity,
 	Column,
 	CreateDateColumn,
 	Entity,
-	JoinColumn,
 	ManyToOne,
 	OneToMany,
 	PrimaryGeneratedColumn,
 	UpdateDateColumn,
 } from "typeorm";
-import { User } from "./User";
 import { Updoot } from "./Updoot";
+import { User } from "./User";
 
 @ObjectType()
 @Entity()

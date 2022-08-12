@@ -11,6 +11,7 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import { MyContext } from "src/types";
 import AppDataSource from "./utils/appDataSource";
+import "dotenv-safe/config";
 
 // import { sendEmail } from "./utils/sendEmail";
 import { createUserLoader } from "./utils/createUserLoader";
@@ -41,7 +42,7 @@ const main = async () => {
 				secure: true, //__prod__ // cookie only works in https
 			},
 			saveUninitialized: false,
-			secret: "fw4y7duiehofjkjgnejuicydsc",
+			secret: process.env.SESSION_SECRET,
 			resave: false,
 		})
 	);
@@ -85,9 +86,9 @@ const main = async () => {
 	app.get("/", (_, res) => {
 		res.send("heloo");
 	});
-
-	app.listen(4000, () => {
-		console.log("server started on localhost:4000");
+	const PORT: string = process.env.PORT;
+	app.listen(PORT, () => {
+		console.log(`server started on localhost:${PORT}`);
 	});
 
 	// await new Promise<void>(resolve =>

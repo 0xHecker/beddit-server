@@ -1,23 +1,22 @@
 import {
-	Resolver,
-	Query,
 	Arg,
-	Mutation,
-	InputType,
-	Field,
 	Ctx,
-	UseMiddleware,
-	Int,
+	Field,
 	FieldResolver,
-	Root,
+	InputType,
+	Int,
+	Mutation,
 	ObjectType,
+	Query,
+	Resolver,
+	Root,
+	UseMiddleware,
 } from "type-graphql";
 import { Post } from "../entities/Post";
-import { MyContext } from "../types";
-import isAuth from "../middleware/isAuth";
 import { Updoot } from "../entities/Updoot";
+import isAuth from "../middleware/isAuth";
+import { MyContext } from "../types";
 import AppDataSource from "../utils/appDataSource";
-import { User } from "../entities/User";
 
 @InputType()
 class PostInput {
