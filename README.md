@@ -49,6 +49,9 @@ yarn start
 
 ## Development setup
 
+### Docker image
+https://hub.docker.com/repository/docker/shanmukh3/beddit
+
 ### Backend
 
 Setup postgresql: here's guides for [Ubuntu][2] and [Manjaro/Arch][3].
