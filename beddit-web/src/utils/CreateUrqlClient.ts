@@ -96,7 +96,7 @@ const CreateUrqlClient = (ssrExchange: any, ctx: any) => {
 		cookie = ctx?.req?.headers?.cookie;
 	}
 	return {
-		url: "http://localhost:4000/graphql",
+		url: process.env.NEXT_PUBLIC_API_URL as string,
 		fetchOptions: {
 			credentials: "include" as const,
 			headers: cookie
@@ -119,6 +119,7 @@ const CreateUrqlClient = (ssrExchange: any, ctx: any) => {
 						deletePost: (_result, args, cache, info) => {
 							cache.invalidate({
 								__typename: "Post",
+								// @ts-ignore
 								_id: (args as DeletePostMutationVariables).id,
 							});
 						},

@@ -3,7 +3,7 @@ import { Post } from "../entities/Post";
 import { Updoot } from "../entities/Updoot";
 import { User } from "../entities/User";
 import { DataSource } from "typeorm";
-import "dotenv-safe/config";
+require("dotenv").config();
 
 const AppDataSource = new DataSource({
 	type: "postgres",

@@ -60,6 +60,7 @@ const Index = () => {
 							onClick={() =>
 								setVariables({
 									limit: variables.limit,
+									// @ts-ignore
 									cursor:
 										data.posts.posts[data.posts.posts.length - 1].createdAt,
 								})

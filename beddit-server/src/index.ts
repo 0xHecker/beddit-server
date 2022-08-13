@@ -11,8 +11,9 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import { MyContext } from "src/types";
 import AppDataSource from "./utils/appDataSource";
-import "dotenv-safe/config";
+import cors from "cors";
 
+require("dotenv").config();
 // import { sendEmail } from "./utils/sendEmail";
 import { createUserLoader } from "./utils/createUserLoader";
 
@@ -28,6 +29,18 @@ const main = async () => {
 	const RedisStore = connectRedis(session);
 	const redis = Redis.createClient();
 	app.set("trust proxy", 1);
+
+	app.use(
+		cors({
+			origin: [
+				process.env.CORS_ORIGIN,
+				"http://localhost:4000",
+				"https://beddit.shanmukh.xyz",
+				"https://shanmukh.xyz",
+			],
+			credentials: true,
+		})
+	);
 
 	app.use(
 		session({
@@ -74,12 +87,8 @@ const main = async () => {
 
 	apolloServer.applyMiddleware({
 		app,
-		cors: {
-			origin: ["https://studio.apollographql.com", process.env.CORS_ORIGIN],
-			credentials: true,
-		},
+		cors: false,
 	});
-	app.set("trust proxy", 1);
 
 	app.get("/", (_, res) => {
 		res.send("heloo");
