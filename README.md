@@ -70,8 +70,6 @@ You get hot reload and database auto-synchronization enabled by default.
 
 Run `yarn dev` to start the next server in development mode.
 
-Testing: run `yarn test:frontend` in the `server` folder and `yarn test` in the
-`web` folder.
 
 [1]: https://www.youtube.com/watch?v=I6ypD7qv3Z8
 [2]: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-20-04
