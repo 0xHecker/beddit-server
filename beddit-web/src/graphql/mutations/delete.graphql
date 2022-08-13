@@ -1,3 +1,0 @@
-mutation DeletePost($deletePostId: Int!) {
-	deletePost(id: $deletePostId)
-}

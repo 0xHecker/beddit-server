@@ -1,7 +1,0 @@
-fragment RegularUser on User {
-	_id
-	username
-	updatedAt
-	username
-	email
-}
