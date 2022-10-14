@@ -31,17 +31,18 @@ const main = async () => {
 	const redis = Redis.createClient();
 	app.set('trust proxy', 1);
 
-	// app.use(
-	// 	cors({
-	// 		origin: [
-	// 			process.env.CORS_ORIGIN,
-	// 			'http://localhost:4000',
-	// 			'https://beddit.shanmukh.xyz',
-	// 			'https://shanmukh.xyz',
-	// 		],
-	// 		credentials: true,
-	// 	})
-	// );
+	app.use(
+		cors({
+			origin: [
+				process.env.CORS_ORIGIN,
+				'http://localhost:3000',
+				'https://beddit.shanmukh.xyz',
+				'https://shanmukh.xyz',
+				'https://beddit-lac.vercel.app',
+			],
+			credentials: true,
+		})
+	);
 
 	app.use(
 		session({
