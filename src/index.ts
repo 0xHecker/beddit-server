@@ -28,7 +28,8 @@ const main = async () => {
 
 	const RedisStore = connectRedis(session);
 
-	const redis = Redis.createClient();
+	const redis = new Redis(process.env.REDIS_URL);
+
 	app.set('trust proxy', 1);
 
 	app.use(

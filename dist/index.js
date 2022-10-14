@@ -23,7 +23,7 @@ const main = async () => {
     await appDataSource_1.default.initialize();
     await appDataSource_1.default.runMigrations();
     const RedisStore = (0, connect_redis_1.default)(express_session_1.default);
-    const redis = ioredis_1.default.createClient();
+    const redis = new ioredis_1.default(process.env.REDIS_URL);
     app.set('trust proxy', 1);
     app.use((0, cors_1.default)({
         origin: [
