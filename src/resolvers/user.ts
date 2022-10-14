@@ -8,15 +8,18 @@ import {
 	Query,
 	FieldResolver,
 	Root,
-} from "type-graphql";
-import { MyContext } from "../types";
-import { User } from "../entities/User";
-import argon2 from "argon2";
-import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from "../constants";
-import { UsernamePasswordInput } from "./UsernamePasswordImport";
-import { validateRegister } from "../utils/validateRegister";
-import { sendEmail } from "../utils/sendEmail";
-import { v4 } from "uuid";
+} from 'type-graphql';
+import { MyContext } from '../types';
+import { User } from '../entities/User';
+import argon2 from 'argon2';
+import {
+	COOKIE_NAME,
+	FORGET_PASSWORD_PREFIX,
+} from '../constants';
+import { UsernamePasswordInput } from './UsernamePasswordImport';
+import { validateRegister } from '../utils/validateRegister';
+import { sendEmail } from '../utils/sendEmail';
+import { v4 } from 'uuid';
 
 @ObjectType()
 class FieldError {
@@ -42,21 +45,22 @@ export class UserResolver {
 		if (req.session.userId === user._id) {
 			return user.email;
 		}
-		return "";
+		return '';
 	}
 	@Mutation(() => UserResponse)
 	async changePassword(
-		@Arg("token") token: string,
-		@Arg("newPassword") newPassword: string,
-		@Arg("confirmNewPassword") confirmNewPassword: string,
+		@Arg('token') token: string,
+		@Arg('newPassword') newPassword: string,
+		@Arg('confirmNewPassword') confirmNewPassword: string,
 		@Ctx() { redis, req }: MyContext
 	): Promise<UserResponse> {
 		if (newPassword.length < 3) {
 			return {
 				errors: [
 					{
-						field: "newPassword",
-						message: "password length must be greater than 2",
+						field: 'newPassword',
+						message:
+							'password length must be greater than 2',
 					},
 				],
 			};
@@ -65,8 +69,8 @@ export class UserResolver {
 			return {
 				errors: [
 					{
-						field: "confirmNewPassword",
-						message: "password fields do not match",
+						field: 'confirmNewPassword',
+						message: 'password fields do not match',
 					},
 				],
 			};
@@ -78,21 +82,23 @@ export class UserResolver {
 			return {
 				errors: [
 					{
-						field: "token",
-						message: "token expired",
+						field: 'token',
+						message: 'token expired',
 					},
 				],
 			};
 		}
 
 		const userId = parseInt(userIdstr);
-		const user = await User.findOne({ where: { _id: userId } });
+		const user = await User.findOne({
+			where: { _id: userId },
+		});
 		if (!user) {
 			return {
 				errors: [
 					{
-						field: "token",
-						message: "User no longer exists",
+						field: 'token',
+						message: 'User no longer exists',
 					},
 				],
 			};
@@ -112,7 +118,7 @@ export class UserResolver {
 
 	@Mutation(() => Boolean)
 	async forgotPassword(
-		@Arg("email") email: string,
+		@Arg('email') email: string,
 		@Ctx() { redis }: MyContext
 	) {
 		const user = await User.findOne({ where: { email } });
@@ -124,12 +130,25 @@ export class UserResolver {
 
 		const token = v4();
 		const key = FORGET_PASSWORD_PREFIX + token;
-
-		await redis.set(key, user._id, "EX", 1000 * 60 * 60 * 3);
+		await redis.set(
+			key,
+			user._id,
+			'EX',
+			1000 * 60 * 60 * 3
+		);
 		await sendEmail(
+			email,
+			`
+			<h2>Dear ${user.username},</h2>
+
+			<h2>Click on this link to reset your beddit account password</h2>
+			<a href="http://localhost:3000/change-password/${token}"> reset password </a> `
+		);
+		console.log(
 			email,
 			`<a href="http://localhost:3000/change-password/${token}"> reset password </a>`
 		);
+
 		return true;
 	}
 
@@ -138,12 +157,14 @@ export class UserResolver {
 		if (!req.session.userId) {
 			return null;
 		}
-		return await User.findOne({ where: { _id: req.session.userId } });
+		return await User.findOne({
+			where: { _id: req.session.userId },
+		});
 	}
 
 	@Mutation(() => UserResponse)
 	async register(
-		@Arg("options") options: UsernamePasswordInput,
+		@Arg('options') options: UsernamePasswordInput,
 		@Ctx() { req }: MyContext
 	): Promise<UserResponse> {
 		const errors = validateRegister(options);
@@ -151,7 +172,9 @@ export class UserResolver {
 			return { errors };
 		}
 
-		const hashedPassword = await argon2.hash(options.password);
+		const hashedPassword = await argon2.hash(
+			options.password
+		);
 		let user;
 		try {
 			const result = await User.create({
@@ -161,29 +184,32 @@ export class UserResolver {
 			}).save();
 			user = result as any;
 		} catch (err) {
-			if (err.detail.includes("email")) {
+			if (err.detail.includes('email')) {
 				return {
 					errors: [
 						{
-							field: "email",
-							message: "that email is already used",
+							field: 'email',
+							message: 'that email is already used',
 						},
 					],
 				};
 			}
-			if (err.code === "23505" || err.detail.includes("already exists")) {
+			if (
+				err.code === '23505' ||
+				err.detail.includes('already exists')
+			) {
 				return {
 					errors: [
 						{
-							field: "username",
-							message: "username already taken",
+							field: 'username',
+							message: 'username already taken',
 						},
 					],
 				};
 			}
 		}
 
-		req.headers["x-forwarded-proto"] = "https";
+		req.headers['x-forwarded-proto'] = 'https';
 
 		req.session!.userId = user._id;
 
@@ -192,12 +218,12 @@ export class UserResolver {
 
 	@Mutation(() => UserResponse)
 	async login(
-		@Arg("usernameOrEmail") usernameOrEmail: string,
-		@Arg("password") password: string,
+		@Arg('usernameOrEmail') usernameOrEmail: string,
+		@Arg('password') password: string,
 		@Ctx() { req }: MyContext
 	): Promise<UserResponse> {
 		const user = await User.findOne(
-			usernameOrEmail.includes("@")
+			usernameOrEmail.includes('@')
 				? { where: { email: usernameOrEmail } }
 				: { where: { username: usernameOrEmail } }
 		);
@@ -205,26 +231,29 @@ export class UserResolver {
 			return {
 				errors: [
 					{
-						field: "usernameOrEmail",
-						message: "that username does not exist",
+						field: 'usernameOrEmail',
+						message: 'that username does not exist',
 					},
 				],
 			};
 		}
 
-		const valid = await argon2.verify(user.password, password);
+		const valid = await argon2.verify(
+			user.password,
+			password
+		);
 		if (!valid) {
 			return {
 				errors: [
 					{
-						field: "password",
-						message: "incorrect password",
+						field: 'password',
+						message: 'incorrect password',
 					},
 				],
 			};
 		}
 		// required inorder to store userId cache
-		req.headers["x-forwarded-proto"] = "https";
+		req.headers['x-forwarded-proto'] = 'https';
 
 		req.session!.userId = user._id;
 

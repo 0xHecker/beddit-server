@@ -5,7 +5,9 @@
 	"main": "index.js",
 	"scripts": {
 		"gen-env": "yarn gen-env-types .env -o src/env.d.ts -e .",
-		"typeorm:migration": "yarn typeorm migration:generate Init -d ./dist/utils/appDataSource.js -p",
+		"typeorm:migration-init": "yarn typeorm migration:generate Init -d ./dist/utils/appDataSource.js -p",
+		"typeorm:migration-generate": "yarn typeorm migration:create ./src/migrations",
+		"typeorm:migration-run": "yarn typeorm migration:run -d ./dist/utils/appDataSource.js",
 		"build": "tsc",
 		"watch": "tsc -w",
 		"dev": "nodemon dist/index.js",
